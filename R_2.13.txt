@@ -1,0 +1,43 @@
+Infrastructure protection	Network traffic filtering	
+
+R_2.13	Manulife approved firewalls must be used to protect and limit network access to Azure  SQL server and SQL Database
+
+
+Azure SQL Database supports enforcing a minimal Transport Layer Security (TLS) version for client connections. By default, the minimum TLS version is set to 1.0. However, to enhance security, you can configure your Azure SQL Server to enforce a minimum TLS version of 1.2, ensuring that only secure, Manulife-approved protocols are used.
+
+Here's how you can ensure that Azure SQL Database is restricted to TLS 1.2 or above using Ansible:
+
+
+Remember to replace the placeholders ({{ your_resource_group }}, {{ your_sql_server_name }}, etc.) with your actual values. This playbook assumes you have Ansible's Azure modules installed and configured.
+
+Additionally, keep the following points in mind:
+
+Client Applications: Ensure that any client applications that connect to the Azure SQL Database are compatible with TLS 1.2. Older applications might face connectivity issues if they don't support the newer protocol.
+
+Network Security Groups (NSG) and Firewalls: Besides the TLS settings, always ensure that your Network Security Groups and Azure SQL firewalls are correctly configured to limit access only from approved sources.
+
+Continuous Monitoring: Implement monitoring to track any unauthorized or unusual access attempts. Azure provides robust logging and monitoring capabilities which can be integrated with tools like Azure Security Center and Azure Monitor.
+
+Review and Audit: Periodically review the configuration settings and audit logs to ensure compliance with Manulife's security policies.
+
+Enforcing TLS 1.2 ensures that the data in transit between clients and the Azure SQL Database is encrypted and protected from many known vulnerabilities present in older protocols.
+
+
+
+
+SAMPLE Ansible Playbook:
+
+
+---
+- name: Ensure Azure SQL Database Accepts Only TLS 1.2 or Above
+  hosts: localhost
+  tasks:
+
+  - name: Set Minimum TLS version to 1.2 for Azure SQL Server
+    azure_rm_sqlserver:
+      resource_group: "{{ your_resource_group }}"
+      name: "{{ your_sql_server_name }}"
+      location: "{{ your_location }}"
+      admin_username: "{{ your_admin_username }}"
+      admin_password: "{{ your_admin_password }}"
+      minimal_tls_version: "1.2"
