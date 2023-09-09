@@ -1,0 +1,42 @@
+R_2.23	Azure SQL Database resources provisioning code  must be stored in Manulife approved version control software with access granted to the required stakeholders only. 
+
+
+To enforce a policy where Azure SQL Database provisioning code must be stored in a specific version control system (let's say, for example, Manulife-approved GitHub repositories), and access granted to specific stakeholders, we'd have to take an indirect approach.
+
+Ansible, by itself, cannot interact directly with code repositories or verify access permissions for users. However, you can use Ansible to:
+
+Collect Azure SQL Database deployment scripts/logs.
+Check the existence of those scripts/logs in a directory.
+Optionally, send notifications if violations are detected.
+Here's an Ansible playbook that represents a very basic check:
+
+You would need additional tools or scripts that interact with your VCS (like GitHub, GitLab, etc.) to validate that:
+
+Code/scripts are committed to the approved repositories.
+The correct access permissions are set up for the approved stakeholders.
+Such validation often requires using the APIs provided by the VCS platforms, and Ansible can help orchestrate those calls, but you'd need a deeper integration and probably custom scripts or tools to achieve this end-to-end.
+
+Lastly, if Manulife has specific tools or APIs that can validate code storage and access, you'd integrate calls to those tools or APIs within your Ansible playbook. Ensure you work closely with your organization's compliance or IT department to get accurate information about tools or APIs available.
+
+
+
+---
+- name: Check SQL Database Provisioning Code in Approved VCS
+  hosts: localhost
+  tasks:
+  
+  # Assuming SQL deployment scripts/logs are stored in /var/log/sql_deployments/
+  - name: Find SQL provisioning scripts
+    find:
+      paths: "/var/log/sql_deployments/"
+      patterns: "*.sql"
+    register: sql_files
+
+  - name: Fail if SQL provisioning scripts are found
+    fail:
+      msg: "SQL provisioning script {{ item.path }} found. Ensure it's stored in approved VCS."
+    with_items: "{{ sql_files.files }}"
+    when: sql_files.matched > 0
+
+  # Add more tasks if you want to send notifications, logs, etc.
+

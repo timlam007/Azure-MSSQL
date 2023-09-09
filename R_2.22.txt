@@ -1,0 +1,72 @@
+R_2.22	Provisioning Azure SQL Database resources must follow Manulife Sevice Now porcess 
+
+
+If you want to ensure that provisioning Azure SQL Database resources follows the Manulife ServiceNow process, you'd probably be integrating with ServiceNow's API to ensure the right workflows, tickets, or change requests are made before any provisioning actions are carried out.
+
+Ansible can interact with APIs, including ServiceNow's API. Here's a generalized approach, assuming Manulife's ServiceNow process involves creating and approving a ticket before provisioning:
+
+Check ServiceNow for a ticket with specific criteria (e.g., state = "approved", type = "Azure SQL Database provisioning").
+If an approved ticket exists, then proceed with Azure SQL Database provisioning.
+Optionally, update the ticket in ServiceNow after provisioning.
+Here's a very simplified playbook to give you an idea:
+
+
+This playbook provides a high-level approach. You'll need to:
+
+Work closely with your ServiceNow administrators to understand the right API endpoints, the schema of the table where tickets are stored, and the criteria to identify approved tickets.
+Securely manage the ServiceNow API token. Avoid hardcoding it in the playbook; instead, use Ansible Vault or other secure methods to inject it during playbook execution.
+
+Tailor the playbook for any additional steps or nuances in the Manulife ServiceNow process.
+Always test such integrations in a safe environment before applying them in production.
+
+
+
+
+
+
+
+
+---
+- name: Provision Azure SQL Database Following ServiceNow Process
+  hosts: localhost
+  tasks:
+
+  # Check for approved ServiceNow ticket
+  - name: Check for approved ServiceNow ticket
+    uri:
+      url: "https://your_service_now_instance.api/service_now_table_name"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ service_now_api_token }}"
+      return_content: yes
+      body_format: json
+    register: service_now_check
+    vars:
+      service_now_api_token: 'YOUR_SERVICENOW_API_TOKEN'
+
+  # Validate the ticket data (this is very generalized; adjust based on your criteria)
+  - name: Fail if no approved ticket found
+    fail:
+      msg: "No approved ServiceNow ticket found for Azure SQL Database provisioning."
+    when: service_now_check.json.result.state != 'approved'
+
+  # Provision the Azure SQL Database
+  - name: Provision Azure SQL Database
+    azure_rm_sqldatabase:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      name: 'your_database_name'
+      # additional parameters as needed
+
+  # Optionally, update the ServiceNow ticket after provisioning
+  - name: Update ServiceNow ticket after provisioning
+    uri:
+      url: "https://your_service_now_instance.api/service_now_table_name/TICKET_ID"
+      method: PUT
+      headers:
+        Authorization: "Bearer {{ service_now_api_token }}"
+      body_format: json
+      body:
+        state: 'completed'
+    when: service_now_check.json.result.state == 'approved'
+

@@ -1,0 +1,76 @@
+R_2.24	Azure SQL Database resources must be provisioned following the established cloud resources provisioning process.
+
+
+
+Ensuring Azure SQL Database resources follow an established cloud resources provisioning process involves multiple aspects, like naming conventions, performance tiers, security settings, etc.
+
+For the sake of this example, let's consider a few provisioning policies:
+
+Naming Conventions: All Azure SQL Databases should have a name following a particular pattern.
+Performance Tiers: All databases should be provisioned at a certain tier (e.g., "Standard").
+Transparent Data Encryption (TDE): Should be enabled for all Azure SQL Databases.
+Azure AD Authentication: Should be enforced.
+
+
+Replace placeholders with actual values.
+
+This playbook assumes:
+
+You have Ansible with Azure modules installed (pip install 'ansible[azure]').
+Azure authentication is properly set up so that Ansible can interact with your Azure resources.
+It's essential to test this playbook in a non-production environment before applying it to any live environment.
+
+
+
+The following Ansible playbook will ensure these policies:
+
+
+---
+- name: Azure SQL Database Hardening
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+
+  - name: Get details of Azure SQL Database
+    azure_rm_sqldatabase_info:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+    register: sqldb_info
+
+  - name: Check if the SQL Database naming convention is followed
+    fail:
+      msg: "The SQL Database name {{ item.name }} does not follow the naming convention."
+    when: "'desired_pattern' not in item.name"
+    with_items:
+      - "{{ sqldb_info.databases }}"
+
+  - name: Ensure SQL Database is in the correct tier
+    azure_rm_sqldatabase:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      name: '{{ item.name }}'
+      edition: Standard
+    with_items:
+      - "{{ sqldb_info.databases }}"
+    when: item.edition != 'Standard'
+
+  - name: Ensure TDE is enabled for Azure SQL Database
+    azure_rm_sqldatabase:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      name: '{{ item.name }}'
+      transparent_data_encryption: Enabled
+    with_items:
+      - "{{ sqldb_info.databases }}"
+    when: item.transparent_data_encryption != 'Enabled'
+
+  - name: Set Azure AD Admin for SQL server (Ensuring Azure AD authentication)
+    azure_rm_sqlserver_facts:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      ad_administrator:
+        login: 'azure_ad_user@yourdomain.com'
+        sid: 'azure_ad_user_object_id'
+        tenant_id: 'your_tenant_id'
+

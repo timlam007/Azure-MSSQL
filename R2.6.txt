@@ -1,0 +1,25 @@
+
+R_2.6	 Local authentication for Azure SQL database must be disabled
+
+Disabling local authentication for Azure SQL database essentially means you'd enforce Azure Active Directory authentication. One way to enforce this is by setting Azure AD admin for your SQL server.
+Here's an Ansible playbook that sets Azure AD admin for the Azure SQL server, which indirectly forces users to use Azure AD authentication:
+
+---
+- name: Enforce Azure AD Authentication for Azure SQL Database
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Set Azure AD Admin for SQL server
+      azure_rm_sqlserver_facts:
+        resource_group: 'your_resource_group'
+        server_name: 'your_sql_server_name'
+        ad_administrator:
+          login: 'azure_ad_user@yourdomain.com'
+          sid: 'azure_ad_user_object_id'
+          tenant_id: 'your_tenant_id'
+      register: ad_admin
+
+    - name: Check if Azure AD Admin is set correctly
+      debug:
+        var: ad_admin
