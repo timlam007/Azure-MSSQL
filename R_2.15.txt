@@ -1,0 +1,57 @@
+Threat detection and monitoring	Audit Events	
+
+R_2.15	Azure SQL auditing must be enabled to track database events. Logs must be forwarded to the Manulife approved log repository
+
+Azure SQL Database auditing tracks database events and writes them to an audit log. The logs can help you maintain regulatory compliance, understand database activity, and gain insight into discrepancies and anomalies that might indicate business concerns or suspected security violations.
+
+Here's a playbook to ensure that auditing is enabled for your Azure SQL Database and that logs are forwarded to the Manulife-approved log repository, which we'll assume is an Azure Blob storage account:
+
+
+In the below playbook:
+
+Replace placeholders ({{ your_resource_group }}, {{ your_sql_server_name }}, etc.) with your actual values.
+The playbook assumes you have Ansible's Azure modules installed and configured.
+Adjust the audit_actions_and_groups to include any additional or different auditing groups or actions as per your requirements.
+
+The tasks to check the forwarding of logs are placeholders. The exact implementation will depend on the specifics of the Manulife-approved repository and how you've set up logging. This might involve querying Azure Blob storage, querying another log repository, or even checking an intermediary log forwarding solution.
+
+Once implemented, always ensure regular reviews of the audit logs, set up alerts for suspicious activities, and ensure that all stakeholders are aware of the logging processes in place.
+
+
+
+
+SAMPLE Ansible Playbook:
+
+
+
+---
+- name: Ensure Azure SQL Database Auditing is Enabled and Logs Forwarded to Manulife Repository
+  hosts: localhost
+  tasks:
+    
+  - name: Enable Auditing on Azure SQL Database
+    azure_rm_sqldatabase_info:
+      resource_group: "{{ your_resource_group }}"
+      server_name: "{{ your_sql_server_name }}"
+      name: "{{ your_database_name }}"
+      blob_auditing_policy:
+        state: enabled
+        storage_account_access_key: "{{ your_storage_account_key }}"
+        storage_endpoint: "https://{{ your_storage_account_name }}.blob.core.windows.net"
+        retention_days: 90  # adjust as needed
+        audit_actions_and_groups:
+          - "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"
+          - "FAILED_DATABASE_AUTHENTICATION_GROUP"
+          # Add more groups or actions as needed
+
+  - name: Check if logs are being forwarded to the Manulife-approved repository
+    # This task can vary depending on the exact requirements and how the forwarding is set up. 
+    # You might use Ansible to query the Azure Blob storage or the logging system to ensure logs are present.
+    # This is a placeholder to demonstrate the intent.
+    command: check_log_forwarding_command
+    register: log_check_result
+
+  - name: Alert if logs are not being forwarded
+    fail:
+      msg: "Logs are not being forwarded to the Manulife-approved repository!"
+    when: log_check_result.stdout != "Logs are forwarded"
