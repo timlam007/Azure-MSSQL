@@ -1,0 +1,44 @@
+Audit Events	R_2.17	Ensure to collect logs from the Azure SQL Database and store them in the Manulife approved log repository
+
+Ensuring logs from the Azure SQL Database are collected and stored in a Manulife-approved 
+log repository involves multiple steps, depending on the specific infrastructure and software Manulife uses. I'll provide a high-level guideline on how this might be accomplished using Azure services and Ansible:
+
+Enable Auditing on Azure SQL Database:
+You first need to ensure that Azure SQL Database Auditing is turned on. This feature will track database events and write them to an audit log in your Azure storage account.
+
+Export Logs to Manulife-approved log repository:
+Depending on the repository Manulife approves, this could mean setting up an Azure Logic App, an Azure Function, or using Azure Data Factory to periodically transfer logs from the Azure storage to the Manulife repository.
+
+For this example, I'll provide a basic outline using Azure Blob Storage as the intermediary store and Ansible to enable auditing:
+
+Please note:
+
+Replace placeholders like your_resource_group, your_sql_server_name, etc., with actual values.
+This example is a simple configuration. A real-world scenario might require more advanced configurations and error handling.
+Storing access keys in a playbook is not recommended for security reasons. Use Azure Key Vault, Ansible Vault, or other methods to securely handle and inject secrets.
+For the second part (transferring logs to Manulife's repository), it will depend on what this repository is. If it's another Azure service, there may be native integrations. If it's an on-premises or third-party solution, you might need a middleware to fetch logs from Blob Storage and push them to the repository. In either case, the exact procedure would depend on the specifics of the Manulife-approved log repository.
+
+Always remember to consult the Azure documentation, work closely with Manulife's IT and security departments, and test any solutions in a controlled environment before deploying them to production.
+
+
+
+
+
+
+---
+- name: Ensure Azure SQL Database Auditing is Enabled
+  hosts: localhost
+  tasks:
+  
+  # Ensure Azure SQL Database Auditing is enabled
+  - name: Enable Auditing on Azure SQL Database
+    azure_rm_sqldatabase:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      name: 'your_database_name'
+      auditing_policy:
+        state: 'Enabled'
+        storage_account: '/subscriptions/your_subscription_id/resourceGroups/your_resource_group/providers/Microsoft.Storage/storageAccounts/your_storage_account'
+        storage_endpoint: 'https://your_storage_account.blob.core.windows.net/'
+        storage_account_access_key: 'your_storage_account_key'
+        retention_days: 365
