@@ -1,0 +1,64 @@
+Data security and information protection	Data Classification	
+
+R_2.8	Implement controls such as automated data discovery solution for discovering and classifying organization data stored in SQL databases.
+
+
+Note: Currently Manulife doesn't have a tool or porcess to meet this requirements. Untill tool or porcess is established, this requirement is exepted. 
+
+
+Implementing automated data discovery and classification solutions is crucial for organizations to maintain a clear understanding of their sensitive data, compliance obligations, and security postures. For Azure SQL databases, Azure offers a built-in Data Discovery & Classification feature that can assist in identifying, classifying, and labeling sensitive data.
+
+Here’s a step-by-step guide:
+
+1. Azure Data Discovery & Classification
+Enable Data Discovery & Classification:
+Navigate to the Azure portal.
+Go to your SQL Database instance.
+Under the "Security" heading in the left-hand menu, select "Data Discovery & Classification".
+Click on the "Get Started" button to begin the process.
+Azure will automatically suggest certain classifications based on the database content. Review these suggestions.
+Apply or adjust these classifications as per your organization's data handling and sensitivity guidelines.
+Monitor and Respond:
+Regularly review the recommendations and classifications to ensure that new or changed data gets classified correctly.
+Set up alerts for unusual access patterns or when highly classified data is accessed.
+
+
+2. Implement Azure Policies
+Azure Policy can help enforce organizational requirements. Create a custom policy that requires Data Discovery & Classification to be enabled for all SQL databases in the environment.
+
+3. Integrate with Advanced Data Security
+Azure SQL Database's Advanced Data Security (ADS) offers vulnerability assessment and Advanced Threat Protection. The vulnerability assessment can assist in detecting misconfigurations and potential vulnerabilities in your databases.
+
+4. Use Third-Party Tools
+Apart from Azure's native capabilities, several third-party solutions can scan, classify, and monitor access to sensitive data in SQL databases. Such tools may offer extended capabilities or fit specific organizational requirements.
+
+Ansible Automation:
+There's no direct Ansible module to enable Azure Data Discovery & Classification. However, you can potentially use the azure_rm_resource module to interact with the Azure REST API and configure settings. Here’s an outline:
+
+
+Please note:
+
+The below playbook is an example; you might need to adapt it based on the specific requirements and the current state of Ansible modules.
+Replace placeholders ({{ your_subscription_id }}, etc.) with actual values.
+
+Regular audits, constant monitoring, and consistent reviews are essential. As data evolves, new types of information may be stored, and the classification should evolve accordingly. Always involve data protection and security teams when implementing and managing data classifications.
+
+
+
+SAMPLE ANSIBLE PLAYBOOK
+
+---
+- name: Ensure Data Discovery & Classification is Enabled on Azure SQL Database
+  hosts: localhost
+  tasks:
+
+  - name: Configure Data Discovery & Classification for Azure SQL Database
+    azure_rm_resource:
+      api_version: '2019-06-01-preview'
+      method: PUT
+      url: "https://management.azure.com/subscriptions/{{ your_subscription_id }}/resourceGroups/{{ your_resource_group }}/providers/Microsoft.Sql/servers/{{ your_sql_server_name }}/databases/{{ your_database_name }}/dataClassification/recommendations/{{ recommendation_name }}?api-version=2019-06-01-preview"
+      body:
+        properties:
+          status: 'Approved'
+    register: classification_result
+
