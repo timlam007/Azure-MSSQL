@@ -1,0 +1,60 @@
+Identity, access and privilege management	Identification and Authentication	
+
+R_2.2	Access to the SQL server and underlying components must be managed through the enterprise identity store such as Azure AD. 
+
+
+
+Managing access to Azure SQL Server and its underlying components through an enterprise identity store like Azure AD is an essential practice to centralize identity management and enforce organizational policies on access and authentication. With Azure AD integration, you can enable multi-factor authentication, conditional access, and more for users accessing the Azure SQL Database.
+
+
+Below is an overview and a suggested Ansible playbook approach to ensure that access is managed via Azure AD:
+
+Steps Overview:
+
+Integrate Azure SQL with Azure AD: Before you can manage access using Azure AD, ensure that your Azure SQL Server is integrated with Azure AD.
+Define Azure AD groups: Organize users into Azure AD groups based on their roles and responsibilities. Assign database permissions to these groups instead of individual users.
+
+Assign roles and permissions: Grant Azure roles for managing Azure SQL resources to Azure AD groups or users and assign database-level permissions using contained database users mapped to Azure AD identities.
+
+
+
+Points to remember:
+
+Azure AD Admin for SQL Server: Before integrating Azure SQL with Azure AD for authentication, you must set an Azure AD user as the Azure AD admin for the SQL server in the Azure portal. This user or another member of the same Azure AD domain can then create contained database users mapped to Azure AD identities.
+
+Database-Level Permissions: You'd use SQL statements like CREATE USER [Azure_AD_User_or_Group_Name] FROM EXTERNAL PROVIDER; to create contained users in the database mapped to Azure AD identities. These users can then be granted necessary permissions using standard SQL GRANT statements.
+
+Continuous Monitoring and Audits: Ensure that there's continuous monitoring and regular audits of the Azure role assignments and database-level permissions to prevent any unauthorized access or changes.
+
+This Ansible playbook serves as a starting point. Depending on your exact requirements, you may need to expand it, integrate SQL scripts for database-level permissions, or adjust according to your organizational practices.
+
+
+
+SAMPLE Ansible Playbook:
+Note: This playbook only illustrates the Azure role assignments. Database-level permissions would still need to be managed via SQL scripts or another mechanism.
+
+
+---
+- name: Manage Azure SQL Access through Azure AD
+  hosts: localhost
+  tasks:
+
+  - name: Assign role to Azure AD group for SQL Server access
+    azure_rm_roleassignment:
+      scope: "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Sql/servers/{{ sql_server_name }}"
+      assignee_object_id: "{{ azure_ad_group_object_id }}"
+      role_definition_name: "{{ azure_role_name }}"
+    vars:
+      subscription_id: "YOUR_SUBSCRIPTION_ID"
+      resource_group_name: "YOUR_RESOURCE_GROUP_NAME"
+      sql_server_name: "YOUR_SQL_SERVER_NAME"
+      azure_ad_group_object_id: "YOUR_AZURE_AD_GROUP_OBJECT_ID"
+      azure_role_name: "YOUR_AZURE_ROLE_NAME"  # e.g., "SQL DB Contributor"
+
+  # Note: You'd have similar tasks for other groups and roles as needed.
+
+  # For database-level permissions, you would use SQL scripts to create contained database 
+  # users mapped to Azure AD identities and assign them the necessary permissions.
+
+
+
