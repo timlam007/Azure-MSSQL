@@ -20,6 +20,8 @@ Lastly, if Manulife has specific tools or APIs that can validate code storage an
 
 
 
+SAMPLE ANSIBLE PLAYBOOK
+
 ---
 - name: Check SQL Database Provisioning Code in Approved VCS
   hosts: localhost
