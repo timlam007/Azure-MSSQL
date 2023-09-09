@@ -1,0 +1,77 @@
+Data security and information protection	Data Confidentiality 	R_2.11	Manulife must employ data anonymization techniques such as data masking to protect the confidentiality and integrity of the data.
+
+
+
+To protect sensitive information while maintaining data utility, data anonymization techniques such as data masking are crucial. Data masking replaces original data with modified but structurally similar content. It can be used to ensure that sensitive data remains confidential, while non-sensitive data remains usable.
+
+For an organization like Manulife, the exact implementation of data masking will be influenced by the nature of the data, the technologies in use, regulatory requirements, and business needs.
+
+If Manulife is using Azure services (given the previous context), Azure offers a feature called Dynamic Data Masking for Azure SQL Database that helps with this. Here's a general approach with a focus on Azure, though the concept can be applied across various platforms:
+
+Steps to Implement Data Masking in Azure SQL Database:
+Identify Sensitive Data:
+Before you start masking data, identify the fields that contain sensitive information. This might include fields like Social Security Numbers, bank account numbers, email addresses, etc.
+
+
+Enable Dynamic Data Masking:
+Azure SQL Database provides built-in tools for data masking. Use the Azure portal, Azure PowerShell, or Azure CLI to create masking rules for the identified fields.
+
+
+
+Notes:
+
+In the below playbook, replace placeholders like your_resource_group, your_sql_server_name, etc., with your actual values.
+
+Ensure you've defined all necessary fields you wish to mask.
+
+Remember, Dynamic Data Masking doesn't modify the actual data in the database. It masks the data to users who don't have the unmasking privilege.
+Additional Recommendations:
+
+Data Masking vs. Data Encryption: Remember that data masking and data encryption are different. Masked data can be reverted to its original state without a decryption key (since the original data isn't changed). Encrypted data requires decryption. Consider data encryption for data at rest and during transit.
+
+Data Discovery and Classification: Azure provides tools to automatically discover and classify sensitive data. This can assist in ensuring you haven't missed any fields that should be masked.
+
+Regular Audits: Regularly audit and review the masked fields to ensure that new fields or changing business requirements don't lead to exposure of sensitive data.
+
+Limit Unmasking Privileges: Ensure that only necessary personnel have the permission to view unmasked data.
+
+Lastly, always involve Manulife's data protection and security teams when making decisions and changes related to data masking or any other security measures. Test any changes in a controlled environment before applying them to production data.
+
+
+
+
+
+SAMPLE ANSIBLE PLAYBOOK
+
+Ansible Playbook to Implement Data Masking on Azure SQL:
+
+
+---
+- name: Implement Data Masking on Azure SQL Database
+  hosts: localhost
+  tasks:
+
+  - name: Mask Email Field in Customers Table
+    azure_rm_sqldatabasemaskingpolicy:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      database_name: 'your_database_name'
+      schema_name: 'dbo'
+      table_name: 'Customers'
+      column_name: 'Email'
+      masking_function: "Email"
+      
+  - name: Mask SSN Field in Customers Table
+    azure_rm_sqldatabasemaskingpolicy:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      database_name: 'your_database_name'
+      schema_name: 'dbo'
+      table_name: 'Customers'
+      column_name: 'SSN'
+      masking_function: "SSN"
+
+
+
+
+
