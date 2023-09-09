@@ -11,6 +11,8 @@ Configure Log Forwarding: Once the agent is installed, you need to configure it 
 For this example, let's assume you're using Splunk as your SIEM solution. Splunk uses a Universal Forwarder to gather and send logs. Here's a simple Ansible playbook that installs and configures Splunk Universal Forwarder on a Linux host and sets it up to forward logs:
 
 
+
+
 SAMPLE ANSIBLE PLAYBOOK
 
 ---
