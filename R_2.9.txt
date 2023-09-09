@@ -1,0 +1,63 @@
+Data security and information protection	Protection Of Information At Rest	
+
+R_2.9	Data stored at rest within the Azure SQL database must be encrypted using Manulife-approved encryption mechanisms. 
+
+If database contains PII data, then it must be encrypted using  own keys for encryption and regular data can be encrypted using Microsoft generated keys.
+
+
+
+For Azure SQL databases, Azure offers a feature called Transparent Data Encryption (TDE) which encrypts the data at rest. Azure SQL Database also provides two options for managing TDE protector keys: service-managed (Microsoft-managed) and customer-managed (bring your own key, BYOK).
+
+To fulfill Manulife's requirement:
+
+For databases containing regular data, you can enable TDE with service-managed keys.
+For databases containing PII (Personally Identifiable Information), you should enable TDE with customer-managed keys.
+Ansible Playbook:
+
+
+Below is an Ansible playbook that checks if a database contains PII data and applies the appropriate encryption mechanism:
+
+
+Remember to replace placeholders ({{ your_resource_group }}, etc.) with your actual values.
+
+This playbook assumes you have Ansible's Azure modules installed and configured, and it provides a mock check for PII data. 
+
+In an actual scenario, you'll need to have a method in place to determine whether a given database contains PII data or not. Also, note that when using customer-managed keys, you must have an Azure Key Vault setup and the encryption key ready.
+
+Lastly, always review Azure and Manulife's security best practices and guidelines, and regularly audit and monitor your databases to ensure they remain compliant with your organization's policies.
+
+
+
+SAMPLE ANSIBLE PLAYBOOK
+
+---
+- name: Ensure Azure SQL Database is Encrypted Appropriately
+  hosts: localhost
+  tasks:
+
+  - name: Check if the database contains PII data (mock check)
+    # In real-world scenarios, this check would be more complex and would likely involve querying the database.
+    set_fact:
+      contains_pii: true
+      # Set this value dynamically based on your real-world scenario
+
+  - name: Enable TDE with Service-Managed Key for Regular Data
+    azure_rm_sqldatabase:
+      resource_group: "{{ your_resource_group }}"
+      server_name: "{{ your_sql_server_name }}"
+      name: "{{ your_database_name }}"
+      transparent_data_encryption: enabled
+    when: not contains_pii
+
+  - name: Enable TDE with Customer-Managed Key for PII Data
+    azure_rm_sqldatabase:
+      resource_group: "{{ your_resource_group }}"
+      server_name: "{{ your_sql_server_name }}"
+      name: "{{ your_database_name }}"
+      transparent_data_encryption: enabled
+      # You'll need additional configurations here to specify your own key vault and key details
+    when: contains_pii
+
+
+
+
