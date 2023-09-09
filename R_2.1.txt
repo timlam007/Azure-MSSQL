@@ -1,0 +1,79 @@
+Identity, access and privilege management	Access Control	
+
+R_2.1	"Access to Azure SQL server and underlying components must be granted following the principle of least privileged and segregation of duties. This can be achieved by using Azure roles. Azure roles are used for managing Azure Resources, and do not apply to database permissions.
+
+
+SQL DB Contributor- Privileged role
+SQL Server Contributor - Privileged role
+SQL Security Manager - Privileged role
+
+
+
+Access to privileged roles must be managed as per the established privileged access management process.
+Note: If DBA team requires to create Manulife custom role  such as ""MFC_DB_Custom_Contributor"" role, then it must follow least privileged principal process. 
+
+The principle of least privilege (PoLP) and segregation of duties are fundamental security concepts that entail giving a user or a process only the necessary permissions for performing their stated functions, nothing more.
+
+For Azure SQL server and underlying components, it's crucial to manage access carefully, leveraging Azure roles to ensure that only necessary permissions are granted. While Azure roles are excellent for managing Azure Resources, database-level permissions are separate.
+
+The following Ansible playbook demonstrates how to manage these Azure roles by:
+
+Ensuring that a specific list of users/groups have access to certain privileged roles.
+
+Making sure that if a custom role (e.g., MFC_DB_Custom_Contributor) is created, it strictly adheres to the least privilege principle.
+
+For this playbook:
+
+subscription_id is the ID of your Azure subscription.
+
+resource_group_name is the name of the resource group where your Azure SQL server resides.
+
+The *_users variables (e.g., sql_db_contributor_users) are lists of user or group object IDs that should be granted the specified roles. These lists should be defined in your inventory or passed as extra vars.
+Note:
+
+Regular Audits: It's essential to perform regular audits of role assignments to ensure compliance with the principle of least privilege.
+
+Database Level Permissions: This playbook addresses Azure resource permissions. Separate mechanisms, such as SQL scripts or database management tools, would be required to manage database-level permissions.
+
+Custom Roles: When creating custom roles like MFC_DB_Custom_Contributor, ensure that you only include the permissions absolutely necessary for the role's intended function. This is in line with the principle of least privilege.
+
+For a complete solution, you'd likely need additional playbooks or tasks for monitoring and auditing role assignments, creating and managing custom roles, and perhaps integration with your organization's privileged access management process.
+
+
+
+
+SAMPLE Ansible Playbook:
+
+
+---
+- name: Manage Access to Azure SQL using Azure Roles
+  hosts: localhost
+  tasks:
+
+  - name: Assign SQL DB Contributor role to specified users/groups
+    azure_rm_roleassignment:
+      scope: "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}"
+      assignee_object_id: "{{ item }}"
+      role_definition_name: "SQL DB Contributor"
+    with_items: "{{ sql_db_contributor_users }}"
+
+  - name: Assign SQL Server Contributor role to specified users/groups
+    azure_rm_roleassignment:
+      scope: "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}"
+      assignee_object_id: "{{ item }}"
+      role_definition_name: "SQL Server Contributor"
+    with_items: "{{ sql_server_contributor_users }}"
+
+  - name: Assign SQL Security Manager role to specified users/groups
+    azure_rm_roleassignment:
+      scope: "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}"
+      assignee_object_id: "{{ item }}"
+      role_definition_name: "SQL Security Manager"
+    with_items: "{{ sql_security_manager_users }}"
+
+  # Note: For custom roles, you would first define the role using azure_rm_roledefinition 
+  # and then assign it similar to the above tasks.
+
+
+
+
