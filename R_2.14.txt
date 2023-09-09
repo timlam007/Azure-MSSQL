@@ -1,0 +1,59 @@
+Infrastructure protection	Network traffic filtering	R_2.14	Public network access to Azure SQL server and database must not be allowed. 
+
+
+
+
+Ensuring that public network access to your Azure SQL Server and database is restricted is a crucial security measure. Azure SQL provides firewall settings to control who can access the SQL server. 
+
+By default, Azure SQL is locked down and does not allow any access until you define the firewall rules.
+
+To ensure that public access is denied, you can configure the firewall rules such that only specific IP addresses or Azure resources can access the database.
+
+Here's a step-by-step guideline using Ansible to ensure that public network access is restricted:
+
+
+Some key points:
+
+In the azure_rm_sqlfirewallrule task, the range 10.0.0.1 to 10.0.0.255 is used as a placeholder. Replace it with the actual range you wish to allow. This range can be specific IPs of your on-premises resources or other Azure resources.
+
+The public_network_access: Disabled setting ensures that public network access is disabled for the SQL server.
+
+Storing passwords or secrets directly in a playbook is not recommended. Use Azure Key Vault, Ansible Vault, or another method to handle secrets securely.
+
+To execute the playbook, ensure you have the Azure SDK and Ansible Azure module installed. Also, authenticate Ansible to Azure using service principal or CLI-based authentication.
+
+Lastly, always test in a controlled environment before making security-related changes in production. Review the settings with the IT/security team and consult Azure documentation for updated and best practices.
+
+
+
+SAMPLE ANSIBLE PLAYBOOK
+
+---
+- name: Ensure No Public Access to Azure SQL Server
+  hosts: localhost
+  tasks:
+
+  # Ensure only specific IPs or Azure resources can access the SQL Server
+  - name: Configure Azure SQL Server firewall
+    azure_rm_sqlfirewallrule:
+      resource_group: 'your_resource_group'
+      server_name: 'your_sql_server_name'
+      name: 'Allow_Specific_Range'
+      start_ip_address: '10.0.0.1' # start of your allowed IP range
+      end_ip_address: '10.0.0.255' # end of your allowed IP range
+    register: firewall_result
+
+  - name: Ensure Allow Azure Services setting is off
+    azure_rm_sqlserver:
+      resource_group: 'your_resource_group'
+      name: 'your_sql_server_name'
+      location: 'your_azure_location'
+      version: '12.0' # use your SQL Server version
+      administrator_login: 'sql_admin'
+      administrator_login_password: 'secure_password'
+      identity: SystemAssigned 
+      public_network_access: Disabled
+
+
+
+
