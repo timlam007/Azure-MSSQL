@@ -1,0 +1,76 @@
+Infrastructure protection	Network traffic filtering	R_2.10	Ensure Azure SQL database is accessible through a private endpoint such that access to the Azure SQL database is restricted to Manulife’s private networks.
+
+
+Ensuring that your Azure SQL database is accessible only through a private endpoint is an essential step in securing data access. Private endpoints in Azure provide secure and direct connectivity to Azure services over a private link, effectively bringing the service into your virtual network.
+
+The setup involves creating a private endpoint for the Azure SQL Database and linking it to your virtual network (VNet). This ensures that traffic between your VNet and Azure SQL Database traverses over the Microsoft backbone network, eliminating exposure from the public internet.
+
+Here's a step-by-step guideline:
+
+1. Create a Private Endpoint
+
+Navigate to the Azure portal.
+In the left-hand menu, choose "Create a resource".
+Search for "Private Link" and select it.
+Under "Private Link Center", click on "Private endpoints" and then "New".
+Fill in the details like Subscription, Resource Group, Region, etc.
+For "Resource type", choose "Microsoft.Sql/servers".
+For "Resource", choose your Azure SQL Server instance.
+For "Target sub-resource", choose "sqlServer".
+Configure the VNet and subnet where you want the private endpoint to reside.
+Review & create.
+
+
+2. Update DNS Settings
+
+When using private endpoints, Azure provides a private IP for the Azure SQL Database. For applications to resolve to this private IP, DNS settings might need updates, especially if you're using custom DNS settings.
+
+3. Adjust Network Security Group (NSG) Rules
+Ensure that your NSG rules allow traffic to/from the private IP of the Azure SQL Database.
+
+4. Update Connection Strings
+Update application connection strings to use the private DNS name of the Azure SQL Database provided by the private link.
+
+5. Configure Azure SQL Firewall
+Disable public access to your Azure SQL Database and allow traffic only from your VNet.
+
+Ansible Playbook
+While the Azure Ansible modules are continuously evolving, a direct module for private endpoints might not be available. However, you can use the azure_rm_resource module as a general-purpose solution. Here's a basic outline:
+
+
+Please note:
+
+Replace placeholders with actual values.
+
+The below playbook is a high-level example; a real-world scenario might require more configurations, error handling, and security considerations.
+
+Always test in a controlled environment before applying in production.
+
+Lastly, always consult with your network and security teams, especially when changes involve network configurations and data access policies.
+
+
+SAMPLE ANSIBLE PLAYBOOK
+
+---
+- name: Ensure Azure SQL Database is Accessible Through Private Endpoint
+  hosts: localhost
+  tasks:
+
+  - name: Create Private Endpoint for Azure SQL Database
+    azure_rm_resource:
+      api_version: '2020-06-01'
+      method: PUT
+      url: "https://management.azure.com/subscriptions/{{ your_subscription_id }}/resourceGroups/{{ your_resource_group }}/providers/Microsoft.Network/privateEndpoints/{{ your_endpoint_name }}?api-version=2020-06-01"
+      body:
+        location: '{{ your_location }}'
+        properties:
+          privateLinkServiceConnection:
+            name: '{{ connection_name }}'
+            properties:
+              privateLinkServiceId: '/subscriptions/{{ your_subscription_id }}/resourceGroups/{{ your_resource_group }}/providers/Microsoft.Sql/servers/{{ your_sql_server_name }}'
+              groupIds:
+                - sqlServer
+          subnet:
+            id: '/subscriptions/{{ your_subscription_id }}/resourceGroups/{{ your_resource_group }}/providers/Microsoft.Network/virtualNetworks/{{ your_vnet_name }}/subnets/{{ your_subnet_name }}'
+    register: endpoint_result
+
