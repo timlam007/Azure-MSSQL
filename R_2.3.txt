@@ -1,0 +1,56 @@
+Identity, access and privilege management	Identification and Authentication	
+
+R_2.3	At the SQL database level, contained users must be created which are mapped to Azure AD identities. 
+
+
+Creating contained users mapped to Azure AD identities for an Azure SQL Database allows users to authenticate directly to the Azure SQL Database without needing a login at the Azure SQL Server level. This is beneficial for Azure SQL Databases, especially when you want to encapsulate user identities within the database itself, ensuring the database is portable and making it easier to manage in cloud scenarios.
+
+Using Ansible to automate this directly might require interfacing with SQL commands since Ansible doesn't natively support creating Azure AD mapped contained users for Azure SQL databases (as of my last update in September 2021). This means you might have to use a combination of Ansible modules, particularly the command or shell modules, to execute SQL commands or scripts.
+
+Here's an approach using Ansible to accomplish this:
+
+Install Necessary Tools: Make sure tools like sqlcmd or az (Azure CLI) are installed on your Ansible control machine.
+
+Prepare SQL Script: Prepare a SQL script that creates contained users mapped to Azure AD identities.
+
+Execute SQL Script with Ansible: Use Ansible to execute the SQL script against the Azure SQL Database.
+
+
+
+Please take note:
+
+Ensure you replace placeholders like your_sql_server_name with your actual values.
+
+Make sure that your Azure SQL Database server has Azure AD Admin set, as this is required to create contained users mapped to Azure AD identities.
+Using plain text passwords in playbooks, as shown above, is not secure. Consider using Ansible Vault to encrypt sensitive data or using integrated Azure authentication methods.
+
+Ensure you handle errors and edge cases for a production-ready playbook. The below playbook is a basic example to illustrate the approach.
+Continuous monitoring and management of users is essential. Periodically audit and review the contained users and their permissions to ensure adherence to security and operational best practices.
+
+
+Here's a simple Ansible playbook illustrating the approach:
+
+
+---
+- hosts: localhost
+  vars:
+    sql_server_name: your_sql_server_name
+    database_name: your_database_name
+    azure_ad_username: your_ad_username
+    azure_sql_admin: your_sql_admin_username
+    azure_sql_password: your_sql_admin_password
+
+  tasks:
+  - name: Create contained user mapped to Azure AD identity
+    command: >
+      sqlcmd -S {{ sql_server_name }}.database.windows.net 
+             -d {{ database_name }} 
+             -U {{ azure_sql_admin }} 
+             -P {{ azure_sql_password }} 
+             -Q "CREATE USER [{{ azure_ad_username }}] FROM EXTERNAL PROVIDER;"
+    register: result
+    failed_when: "'Msg' in result.stdout"
+
+  - name: Display result
+    debug:
+      var: result.stdout_lines
