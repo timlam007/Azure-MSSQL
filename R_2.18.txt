@@ -1,0 +1,77 @@
+Audit Record Retention	R_2.18	Store the audit and security logs for a period as defined by Manulife's policy.
+
+
+Ensuring that audit and security logs are stored for a specified period as per an organization's policy is a vital aspect of regulatory compliance and good security practices. The exact implementation will depend on the specifics of Manulife's policy and the systems involved. However, I can provide you a generalized approach using Ansible.
+
+Determine Log Retention Period: You need to know the exact duration as dictated by Manulife's policy. Let's assume, for this example, that the retention period is 365 days.
+
+Identify Log Locations: Determine where the security and audit logs are stored on your system(s).
+
+Set Up Log Rotation: Most Linux systems use logrotate to manage log rotation and retention. You can use Ansible to ensure that logrotate is correctly configured to retain logs for the desired period.
+
+Here's an Ansible playbook that configures logrotate for our hypothetical scenario:
+
+Notes:
+
+Replace your_target_hosts with the group or list of hosts you want to target.
+
+Adjust /path/to/security.log and /path/to/audit.log to point to the actual locations of your logs.
+
+The rotate 365 line specifies keeping 365 days of logs.
+
+This is a very basic example and assumes a Linux target system using logrotate. If you're using different systems or platforms, or if you have centralized logging solutions, the approach would differ.
+
+Always:
+
+Refer to official documentation and best practices when setting up log retention.
+Test configurations in a controlled environment before applying them to production.
+Regularly review log retention settings to ensure they align with policy and any changes in regulatory requirements.
+
+
+
+
+
+
+---
+- name: Ensure Audit and Security Logs Retention Policy
+  hosts: your_target_hosts
+  become: yes
+  tasks:
+
+    # Ensure logrotate is installed
+    - name: Install logrotate
+      package:
+        name: logrotate
+        state: present
+
+    # Configure logrotate for security and audit logs
+    - name: Configure logrotate for log retention
+      copy:
+        content: |
+          /path/to/security.log {
+              daily
+              rotate 365
+              missingok
+              notifempty
+              compress
+              delaycompress
+              sharedscripts
+              postrotate
+                  /bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
+              endscript
+          }
+          /path/to/audit.log {
+              daily
+              rotate 365
+              missingok
+              notifempty
+              compress
+              delaycompress
+              sharedscripts
+              postrotate
+                  /bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
+              endscript
+          }
+        dest: "/etc/logrotate.d/manulife_policy"
+        mode: '0644'
+
