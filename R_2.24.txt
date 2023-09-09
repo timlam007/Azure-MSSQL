@@ -22,6 +22,9 @@ It's essential to test this playbook in a non-production environment before appl
 
 
 
+
+SAMPLE ANSIBLE PLAYBOOK
+
 The following Ansible playbook will ensure these policies:
 
 
