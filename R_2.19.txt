@@ -1,0 +1,52 @@
+R_2.19	Security logs must be ingested into the SIEM solution for analysis and monitoring.
+
+Integrating security logs into a SIEM (Security Information and Event Management) solution is a crucial aspect of an organization's security posture. To create a hardening rule or process using Ansible to ensure security logs are ingested into a SIEM, you would ideally follow these steps:
+
+Identify the Source: Determine where the security logs are coming from. This could be from various systems such as web servers, databases, firewalls, or application logs.
+
+Set Up Forwarders/Collectors: Most SIEM solutions have their agents/forwarders that need to be installed on target systems to collect and forward logs to the SIEM.
+
+Configure Log Forwarding: Once the agent is installed, you need to configure it to pick up the right logs and send them to the SIEM solution.
+
+For this example, let's assume you're using Splunk as your SIEM solution. Splunk uses a Universal Forwarder to gather and send logs. Here's a simple Ansible playbook that installs and configures Splunk Universal Forwarder on a Linux host and sets it up to forward logs:
+
+
+---
+- name: Setup Splunk Universal Forwarder for SIEM Integration
+  hosts: your_target_hosts
+  become: yes
+  tasks:
+
+    # Download and install Splunk Universal Forwarder
+    - name: Download Splunk Universal Forwarder
+      get_url:
+        url: "https://path.to/splunk_forwarder_package.tgz"
+        dest: "/tmp/splunk_forwarder_package.tgz"
+        
+    - name: Install Splunk Universal Forwarder
+      unarchive:
+        src: "/tmp/splunk_forwarder_package.tgz"
+        dest: "/opt"
+        remote_src: yes
+
+    # Configure Forwarder to send logs to Splunk
+    - name: Set up forwarding to Splunk SIEM
+      copy:
+        src: "inputs.conf"
+        dest: "/opt/splunkforwarder/etc/system/local/inputs.conf"
+        mode: '0644'
+
+    - name: Set up output to Splunk SIEM
+      copy:
+        src: "outputs.conf"
+        dest: "/opt/splunkforwarder/etc/system/local/outputs.conf"
+        mode: '0644'
+
+    # Start Splunk Forwarder
+    - name: Start Splunk Universal Forwarder
+      command: "/opt/splunkforwarder/bin/splunk start"
+
+
+
+
+
