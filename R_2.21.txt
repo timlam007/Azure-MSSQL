@@ -1,0 +1,70 @@
+R_2.21	Manulife approved vulnerability scanning solution must be implemented to identify database related vulnerabilities. 
+
+
+
+To ensure that an Azure SQL Database instance is scanned for vulnerabilities using a "Manulife approved vulnerability scanning solution," you would need to automate the process of invoking the scanning tool, ensuring it scans the specific resource, and potentially report or log any findings.
+
+However, without the specific name or API details of the "Manulife approved vulnerability scanning solution," this example will remain generic. I'll use a hypothetical vulnerability scanning tool's API in this example.
+
+Below is a basic Ansible playbook structure that could serve as a starting point:
+
+Please note:
+
+This playbook is highly theoretical and depends on the assumption that such an API and its respective endpoints exist.
+Replace placeholders (YOUR_SCANNER_API_TOKEN, your_azure_sql_endpoint, /path/to/save/) with your actual values.
+Ensure the API token is securely managed, preferably using tools like Ansible Vault.
+Consult with Manulife's IT department or the provider of the vulnerability scanning solution to obtain accurate API details and best practices.
+Finally, before implementing or running any such playbook, always test in a safe, non-production environment.
+
+
+---
+- name: Implement Vulnerability Scanning for Azure SQL Database
+  hosts: localhost
+  tasks:
+
+    # Initiate a scan on the Azure SQL Database
+    - name: Initiate vulnerability scan
+      uri:
+        url: "https://api.manulife-approved-scanner.com/scan"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ scanner_api_token }}"
+        body_format: json
+        body:
+          target: "your_azure_sql_endpoint"  # Replace with your SQL endpoint
+          profile: "database_scan"
+      register: scan_result
+      vars:
+        scanner_api_token: 'YOUR_SCANNER_API_TOKEN'
+
+    # Check the status of the scan (this is a hypothetical step; the actual process might differ)
+    - name: Check scan status
+      uri:
+        url: "https://api.manulife-approved-scanner.com/scan/{{ scan_result.json.scan_id }}/status"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ scanner_api_token }}"
+      register: scan_status
+      until: scan_status.json.status == 'completed'
+      retries: 10
+      delay: 60
+
+    # Optionally, fetch and store the scan results
+    - name: Fetch scan results
+      uri:
+        url: "https://api.manulife-approved-scanner.com/scan/{{ scan_result.json.scan_id }}/results"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ scanner_api_token }}"
+      register: scan_results
+
+    - name: Store scan results locally
+      copy:
+        content: "{{ scan_results.json | to_nice_json }}"
+        dest: "/path/to/save/scan_results.json"
+
+    # Add any additional steps as needed, e.g., send notifications, fail if vulnerabilities are detected, etc.
+
+
+
+
