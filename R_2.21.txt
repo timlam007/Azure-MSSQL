@@ -17,6 +17,9 @@ Consult with Manulife's IT department or the provider of the vulnerability scann
 Finally, before implementing or running any such playbook, always test in a safe, non-production environment.
 
 
+SAMPLE ANSIBLE PLAYBOOK
+
+
 ---
 - name: Implement Vulnerability Scanning for Azure SQL Database
   hosts: localhost
