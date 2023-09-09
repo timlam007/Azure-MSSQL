@@ -23,7 +23,7 @@ Always test such integrations in a safe environment before applying them in prod
 
 
 
-
+SAMPLE ANSIBLE PLAYBOOK
 
 
 ---
