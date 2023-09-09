@@ -1,0 +1,60 @@
+Network traffic filtering	Network Security 	R_2.25	SQL Server default port ( TCP 1433 and UDP port 1434 ) must not be open from Internet 
+
+
+Ensuring that the default SQL Server ports are not exposed to the internet is a crucial security best practice. The primary way to restrict network access in Azure is through the use of Network Security Groups (NSGs).
+
+An NSG contains a list of security rules that allow or deny network traffic to resources connected to Azure Virtual Networks (VNet). The rules can be based on source/destination IP, port, and protocol.
+
+Here's an Ansible playbook to ensure that the default SQL Server ports (TCP 1433 and UDP 1434) are not open from the Internet on an Azure Network Security Group:
+
+Remember to replace placeholders ({{ your_resource_group }}, {{ your_nsg_name }}, etc.) with your actual values. This playbook assumes you have Ansible's Azure modules installed and configured.
+
+Some points to consider:
+
+Priority Values: In the playbook, the rules have priorities of 100 and 101. Ensure that these values don't conflict with other rules in your NSG. The lower the priority number, the earlier the rule is processed.
+
+Test Connectivity: After applying the rules, test connectivity from within your trusted networks to ensure the SQL server is still accessible while ensuring it's inaccessible from the open internet.
+
+Monitor and Alert: Always enable monitoring and alerts on your Azure resources. If someone attempts to change the NSG rules or if there's unexpected traffic, it's essential to be alerted.
+
+By using the below playbook, you can be assured that the SQL Server's default ports are not exposed to potential threats from the Internet.
+
+
+SAMPLE Ansible Playbook:
+
+
+
+---
+- name: Ensure SQL Server Default Ports are not Open to Internet
+  hosts: localhost
+  tasks:
+
+  - name: Ensure TCP 1433 is not exposed to the Internet
+    azure_rm_securitygroup:
+      resource_group: "{{ your_resource_group }}"
+      name: "{{ your_nsg_name }}"
+      rules:
+        - name: 'deny-sql-tcp-1433'
+          protocol: Tcp
+          source_port_range: '*'
+          destination_port_range: '1433'
+          source_address_prefix: 'Internet'
+          destination_address_prefix: '*'
+          access: Deny
+          priority: 100
+          direction: Inbound
+
+  - name: Ensure UDP 1434 is not exposed to the Internet
+    azure_rm_securitygroup:
+      resource_group: "{{ your_resource_group }}"
+      name: "{{ your_nsg_name }}"
+      rules:
+        - name: 'deny-sql-udp-1434'
+          protocol: Udp
+          source_port_range: '*'
+          destination_port_range: '1434'
+          source_address_prefix: 'Internet'
+          destination_address_prefix: '*'
+          access: Deny
+          priority: 101
+          direction: Inbound
