@@ -1,0 +1,70 @@
+Audit Events	R_2.16	Auditing of Microsoft support operations  must be enabled to track operations performed by Microsoft support on the SQL server. Logs must be forwarded to the Manulife approved log repository
+
+
+Note: Auditing of Microsoft support operations tracks Microsoft support engineers' (DevOps) operations on Manulife's server and writes them to an audit log in Manulife's Azure Storage account
+
+
+
+Ensuring auditing for Microsoft support operations on Azure SQL Server is essential for security and compliance purposes. Azure provides a feature called "Azure Support Operations Audit" to help you track actions performed by Microsoft Support. These audit logs can then be forwarded to a specific repository for further analysis and storage.
+
+
+To accomplish this, you can utilize a combination of Azure portal settings, Azure CLI, Azure PowerShell, or Azure SDKs. Here's a step-by-step guideline on how this might be done:
+
+Enable Auditing of Microsoft Support Operations:
+
+Navigate to the Azure portal.
+Go to your SQL Server (not the database, but the server resource).
+Under "Security," click on "Auditing."
+Set "Auditing" to "ON."
+In the "Audit log destination" drop-down, choose your desired target (e.g., "Blob storage").
+Configure other settings like storage account, retention period, etc.
+Under "Advanced Settings", ensure "Audit Microsoft support operations" is set to "ON."
+Click "Save."
+Forward Logs to Manulife-approved Log Repository:
+
+Depending on the specifics of Manulife's approved log repository, you may need a different approach:
+
+Azure Services (like Azure Log Analytics): Direct integration might be available.
+Third-party or on-premises solution: Use Azure Logic Apps, Azure Functions, or another service to create a pipeline to fetch logs from the Azure storage (or other destinations) and push them to the Manulife-approved log repository.
+
+
+Here's a hypothetical Ansible playbook that sets up a Logic App to forward logs to a Manulife-approved repository:
+
+
+
+Please note:
+
+The above Ansible task is a very high-level and generic outline. The real Logic App definition will depend on the specifics of your Azure storage and the Manulife-approved log repository.
+As always, replace placeholders like your_resource_group, your_logic_app_name, etc., with actual values.
+Ensure to handle secrets securely and not expose them directly in your code or playbooks.
+Finally, consult Azure documentation for up-to-date configurations, work with Manulife's IT/security teams, and always test in a non-production environment before deploying any configurations or integrations to production.
+
+
+
+SAMPLE ANSIBLE PLAYBOOK
+
+
+---
+- name: Forward Azure SQL Audit Logs to Manulife Repository
+  hosts: localhost
+  tasks:
+
+  # Create a Logic App to transfer logs to Manulife-approved repository
+  - name: Create Logic App for log forwarding
+    azure_rm_logicapp:
+      resource_group: 'your_resource_group'
+      name: 'your_logic_app_name'
+      state: 'present'
+      location: 'your_location'
+      template:
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "actions": {
+            # Define your Logic App actions here to fetch from blob and send to repository
+        },
+        "triggers": {
+            # Define your Logic App triggers here
+        },
+        "outputs": {}
+
+
