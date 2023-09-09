@@ -1,0 +1,63 @@
+Threat detection and monitoring	Audit Review, Analysis, And Reporting	
+
+
+R_2.20	A Manulife approved Threat Protection solution such as MICROSOFT DEFENDER FOR SQL for Azure SQL Database must be used to continuously monitor traffic for anomalous SQL database access attempts,  prevent SQL injection attempts etc.
+
+
+
+Microsoft Defender for SQL, a component of Azure Defender, offers a set of advanced SQL security capabilities, including detection of anomalous activities indicating unusual and potentially harmful attempts to access or exploit databases.
+
+Here is an Ansible playbook that helps you ensure Microsoft Defender for SQL is enabled for your Azure SQL Database to adhere to Manulife's requirements:
+
+
+In the playbook:
+
+Replace placeholders ({{ your_resource_group }}, {{ your_sql_server_name }}, etc.) with your actual values.
+The email_addresses variable should be a comma-separated list of email addresses you want to notify when a threat is detected.
+If there are any specific alerts you wish not to receive, list them in the disabled_alerts parameter. If you want all alerts, leave it as an empty list.
+Ensure that Ansible's Azure modules are installed and configured for the playbook to work.
+Some additional notes:
+
+Review Policies Regularly: Security threats evolve, so it's essential to periodically review and update your threat protection policies to cover new kinds of attacks.
+
+Incident Response Plan: Ensure that Manulife has an incident response plan in place. When a threat is detected, knowing how to respond is crucial.
+Educate & Train: Ensure that all stakeholders, especially those receiving threat detection alerts, are trained on how to interpret and act on the alerts.
+
+Monitoring & Logging: Continuous monitoring and logging are vital. Ensure that all logs from the threat protection solution are stored securely and are accessible for future investigations or audits.
+
+With Microsoft Defender for SQL enabled, Azure SQL Database will be better protected against a wide range of threats, ensuring the security and integrity of Manulife's data
+
+
+
+
+
+SAMPLE Ansible Playbook:
+
+
+---
+- name: Ensure Microsoft Defender for SQL is Enabled on Azure SQL Database
+  hosts: localhost
+  tasks:
+
+  - name: Enable Advanced Threat Protection on Azure SQL Server
+    azure_rm_sqlserver:
+      resource_group: "{{ your_resource_group }}"
+      name: "{{ your_sql_server_name }}"
+      location: "{{ your_location }}"
+      admin_username: "{{ your_admin_username }}"
+      admin_password: "{{ your_admin_password }}"
+      threat_detection_policy:
+        state: enabled
+        retention_days: 30 # adjust as needed
+        storage_account: "{{ your_storage_account_name }}"
+        storage_endpoint: "https://{{ your_storage_account_name }}.blob.core.windows.net"
+        storage_account_access_key: "{{ your_storage_account_key }}"
+        email_addresses: "{{ notification_email_addresses }}"
+        email_account_admins: yes
+        disabled_alerts: []  # Specify any alerts you want to disable, leave empty for none
+        use_server_default: "Disabled"
+
+
+
+
+
